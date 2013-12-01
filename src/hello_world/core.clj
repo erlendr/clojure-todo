@@ -4,6 +4,7 @@
    hiccup.core
    hiccup.page
    hiccup.form
+   fleetdb.client
    )
 (:require [compojure.route :as route]
           [compojure.handler :as handler]
@@ -16,6 +17,7 @@
 (require 'hiccup.core)
 (require 'hiccup.page)
 (require 'hiccup.form)
+(require 'fleetdb.client)
 
 (def todos [
             {:task "Task 1" :done? false }
