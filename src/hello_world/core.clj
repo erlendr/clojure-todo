@@ -28,7 +28,24 @@
         )
   )
 
-(def response {:html (template "" (html ["h1" "Tasks"]))})
+(defn task-template [tasks]
+  (for [task tasks]
+    (html
+     [:div 
+      [:h3 (task :task)]
+      [:p "Done? " (task :done?)]
+     ] 
+     )
+    )
+  )
+
+(def index (template "" (html
+                         [:h1 "TODO!"]
+                         [:p "All tasks:"]
+                         (task-template todos)
+                         )))
+
+(def response {:html index })
 
 (defroutes app-routes
   (GET "/" [] (response :html))
