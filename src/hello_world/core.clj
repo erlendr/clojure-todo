@@ -33,13 +33,22 @@
     (html
      [:div 
       [:h3 (task :task)]
-      [:p "Done? " (task :done?)]
+      [:p "Done? " (if (task :done?) "yes" "no")]
      ] 
      )
     )
   )
 
-(def index (template "" (html
+(def index (template (html
+                      [:title "Clojure TODO!"]
+                      [:link
+                       {:href "http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700"
+                        :rel "stylesheet"
+                        :type "text/css"}
+                       ]
+                      (include-css "/css/screen.css")
+                      )
+                     (html
                          [:h1 "TODO!"]
                          [:p "All tasks:"]
                          (task-template todos)
