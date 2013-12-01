@@ -19,11 +19,15 @@
 (require 'hiccup.form)
 (require 'fleetdb.client)
 
+(def client (connect))
+
 (def todos [
             {:task "Task 1" :done? false }
             {:task "Task 2" :done? true }
             {:task "Task 3" :done? false }
             ])
+
+(defn select-all-tasks [] (client ["select" "tasks"]))
 
 (defn template [head, body]
   (html5 
@@ -36,9 +40,9 @@
   (for [task tasks]
     (html
      [:div 
-      [:h3 (task :task)]
+      [:h3 (task "task")]
       
-      (if (task :done?)
+      (if (task "done?")
         [:button.btn.btn-success
          [:span.glyphicon.glyphicon-ok-sign]
         ]
@@ -52,7 +56,7 @@
   )
 
 (def index (template (html
-                      [:title "Clojure TODO!"]
+                      [:title "Clojure Todo"]
                       [:meta {
                               :name "viewport"
                               :content "width=device-width, initial-scale=1.0"
@@ -81,7 +85,7 @@
                        [:div.starter-template
                         [:h1 "Clojure Todo"]
                         [:p.lead "All tasks:"]
-                        (task-template todos)
+                        (task-template (select-all-tasks))
                         (form-to {:class "form-inline" :role "form"} [:task "/post"]
                                  [:div.form-group
                                   (label "task" "Task:")
