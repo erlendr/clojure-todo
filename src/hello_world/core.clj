@@ -86,10 +86,10 @@
                         [:h1 "Clojure Todo"]
                         [:p.lead "All tasks:"]
                         (task-template (select-all-tasks))
-                        (form-to {:class "form-inline" :role "form"} [:task "/post"]
+                        (form-to {:class "form-inline" :role "form"} [:post "/"]
                                  [:div.form-group
                                   (label "task" "Task:")
-                                  (text-area {:class "form-control" :placeholder "Enter task text"} "task")
+                                  (text-area {:class "form-control" :placeholder "Enter task text" :id "task" } "task")
                                   (submit-button {:class "btn btn-default"} "Add task")
                                  ]
                         )
@@ -101,9 +101,15 @@
 
 (def response {:html index })
 
+(defn insert-task [task]
+  (def id (inc ((first (select-all-tasks)) "id")))
+  (client ["insert" "tasks" {:id id :task task :done? false}])
+  "yay"
+)
+
 (defroutes app-routes
   (GET "/" [] (response :html))
-  (GET "/task" [id] id)
+  (POST "/" {params :params} (insert-task (params :task)))
   (route/resources "/")
   (route/not-found (template "" "Not Found")))
 
