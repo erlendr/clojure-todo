@@ -8,6 +8,7 @@
    )
 (:require [compojure.route :as route]
           [compojure.handler :as handler]
+          clojure.contrib.logging
           )
 )
 
@@ -18,6 +19,7 @@
 (require 'hiccup.page)
 (require 'hiccup.form)
 (require 'fleetdb.client)
+(require 'clojure.contrib.logging)
 
 (def client (connect))
 
@@ -27,7 +29,8 @@
             {:task "Task 3" :done? false }
             ])
 
-(defn select-all-tasks [] (client ["select" "tasks"]))
+(defn select-all-tasks [] (client ["select" "tasks"]))       
+                                 
 
 (defn template [head, body]
   (html5 
@@ -55,7 +58,7 @@
     )
   )
 
-(def index (template (html
+(defn index [] (template (html
                       [:title "Clojure Todo"]
                       [:meta {
                               :name "viewport"
@@ -76,7 +79,7 @@
                        [:div.container
                         [:div.navbar-header
                          [:a.navbar-brand
-                         {:href="/"} "Clojure Todo"]
+                         {:href "/"} "Clojure Todo"]
                          ]
                         [:div.collapse.navbar-collapse]
                         ]
@@ -86,30 +89,32 @@
                         [:h1 "Clojure Todo"]
                         [:p.lead "All tasks:"]
                         (task-template (select-all-tasks))
-                        (form-to {:class "form-inline" :role "form"} [:post "/"]
+                        (form-to {:class "form-inline" :role "form"} [:post "/task"]
                                  [:div.form-group
                                   (label "task" "Task:")
                                   (text-area {:class "form-control" :placeholder "Enter task text" :id "task" } "task")
                                   (submit-button {:class "btn btn-default"} "Add task")
                                  ]
-                        )
+                                 )
+                        (str (#'select-all-tasks))
                         ]
                        ]
                        (include-js "https://code.jquery.com/jquery.js")
                        (include-js "/js/bootstrap.min.js")
                      )))
 
-(def response {:html index })
-
 (defn insert-task [task]
-  (def id (inc ((first (select-all-tasks)) "id")))
+  (if (empty? (select-all-tasks))
+    (def id 1)
+    (def id (inc ((first (select-all-tasks)) "id")))
+  )
   (client ["insert" "tasks" {:id id :task task :done? false}])
-  "yay"
-)
-
+  (html [:p "Task added with id: " id] )
+  )
 (defroutes app-routes
-  (GET "/" [] (response :html))
-  (POST "/" {params :params} (insert-task (params :task)))
+  (GET "/" [] (index))
+  (GET "/api/task" [] (str (select-all-tasks)))
+  (POST "/task" {params :params} (insert-task (params :task)))
   (route/resources "/")
   (route/not-found (template "" "Not Found")))
 
