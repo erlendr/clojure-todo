@@ -96,8 +96,7 @@
                                   (submit-button {:class "btn btn-default"} "Add task")
                                  ]
                                  )
-                        (str (#'select-all-tasks))
-                        ]
+                          ]
                        ]
                        (include-js "https://code.jquery.com/jquery.js")
                        (include-js "/js/bootstrap.min.js")
