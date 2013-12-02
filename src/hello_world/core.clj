@@ -5,9 +5,11 @@
    hiccup.page
    hiccup.form
    fleetdb.client
+   cheshire.core
    )
 (:require [compojure.route :as route]
           [compojure.handler :as handler]
+          [cheshire.core :refer :all]
           clojure.contrib.logging
           )
 )
@@ -30,7 +32,11 @@
             ])
 
 (defn select-all-tasks [] (client ["select" "tasks"]))       
-                                 
+
+(defn select-task [id] (first (client ["select" "tasks" {"where" ["=" "id" id]}])))
+
+(defn update-task-status [id status] (client ["update" "tasks" {:done? status} {"where" ["=" "id" id]}])) 
+
 
 (defn template [head, body]
   (html5 
@@ -89,7 +95,7 @@
                         [:h1 "Clojure Todo"]
                         [:p.lead "All tasks:"]
                         (task-template (select-all-tasks))
-                        (form-to {:class "form-inline" :role "form"} [:post "/task"]
+                        (form-to {:class "form-inline" :role "form"} [:post "/tasks"]
                                  [:div.form-group
                                   (label "task" "Task:")
                                   (text-area {:class "form-control" :placeholder "Enter task text" :id "task" } "task")
@@ -112,8 +118,16 @@
   )
 (defroutes app-routes
   (GET "/" [] (index))
-  (GET "/api/task" [] (str (select-all-tasks)))
-  (POST "/task" {params :params} (insert-task (params :task)))
+  (GET "/tasks" [] (str (select-all-tasks)))
+  (GET "/tasks/:id" [id] (generate-string (select-task (read-string id))))
+  (POST "/tasks/update-status" {params :params}
+        (generate-string
+         (update-task-status
+          (read-string (params :id))
+          (read-string (params :done))
+          )
+         ))
+  (POST "/tasks" {params :params} (insert-task (params :task)))
   (route/resources "/")
   (route/not-found (template "" "Not Found")))
 
