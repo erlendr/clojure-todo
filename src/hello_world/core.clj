@@ -25,11 +25,14 @@
 
 (def client (connect))
 
-(def todos [
-            {:task "Task 1" :done? false }
-            {:task "Task 2" :done? true }
-            {:task "Task 3" :done? false }
-            ])
+(defn insert-task [task]
+  (if (empty? (select-all-tasks))
+    (def id 1)
+    (def id (inc ((first (select-all-tasks)) "id")))
+  )
+  (client ["insert" "tasks" {:id id :task task :done? false}])
+  (html [:p "Task added with id: " id] )
+  )
 
 (defn select-all-tasks [] (client ["select" "tasks"]))       
 
@@ -37,6 +40,7 @@
 
 (defn update-task-status [id status] (client ["update" "tasks" {:done? status} {"where" ["=" "id" id]}])) 
 
+(defn delete-task [id] (client ["delete" "tasks" {"where" ["=" "id" id]} ]))
 
 (defn template [head, body]
   (html5 
@@ -48,21 +52,23 @@
 (defn task-template [tasks]
   (for [task tasks]
     (html
-     [:div 
+     [:div.task
       [:h3 (task "task")]
-      
+
+      [:div.btn-group
       (if (task "done?")
-        [:button.btn.btn-success
-         [:span.glyphicon.glyphicon-ok-sign]
-        ]
-        [:button.btn.btn-default
-         [:span.glyphicon.glyphicon-ok-circle]
-        ]
-      )
-     ] 
-     )
+        [:button.btn.btn-success {:data-task-id (task "id") }
+         [:span.glyphicon.glyphicon-ok-sign]]
+        [:button.btn.btn-default {:data-task-id (task "id")}
+         [:span.glyphicon.glyphicon-ok-circle]] 
+        )
+        [:button.btn.btn-danger.task-delete {:data-task-id (task "id") }
+         [:span.glyphicon.glyphicon-remove]]
+       ]
+      ]
     )
   )
+)
 
 (defn index [] (template (html
                       [:title "Clojure Todo"]
@@ -106,16 +112,9 @@
                        ]
                        (include-js "https://code.jquery.com/jquery.js")
                        (include-js "/js/bootstrap.min.js")
+                       (include-js "/js/site.js")
                      )))
 
-(defn insert-task [task]
-  (if (empty? (select-all-tasks))
-    (def id 1)
-    (def id (inc ((first (select-all-tasks)) "id")))
-  )
-  (client ["insert" "tasks" {:id id :task task :done? false}])
-  (html [:p "Task added with id: " id] )
-  )
 (defroutes app-routes
   (GET "/" [] (index))
   (GET "/tasks" [] (str (select-all-tasks)))
@@ -128,6 +127,7 @@
           )
          ))
   (POST "/tasks" {params :params} (insert-task (params :task)))
+  (DELETE "/tasks/:id" [id] (generate-string (delete-task (read-string id))))
   (route/resources "/")
   (route/not-found (template "" "Not Found")))
 
