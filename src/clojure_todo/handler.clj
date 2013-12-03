@@ -1,4 +1,4 @@
-(ns hello-world.core
+(ns clojure-todo.handler
 (:use
    compojure.core
    hiccup.core
@@ -10,7 +10,6 @@
 (:require [compojure.route :as route]
           [compojure.handler :as handler]
           [cheshire.core :refer :all]
-          clojure.contrib.logging
           )
 )
 
@@ -21,18 +20,8 @@
 (require 'hiccup.page)
 (require 'hiccup.form)
 (require 'fleetdb.client)
-(require 'clojure.contrib.logging)
 
 (def client (connect))
-
-(defn insert-task [task]
-  (if (empty? (select-all-tasks))
-    (def id 1)
-    (def id (inc ((first (select-all-tasks)) "id")))
-  )
-  (client ["insert" "tasks" {:id id :task task :done? false}])
-  (html [:p "Task added with id: " id] )
-  )
 
 (defn select-all-tasks [] (client ["select" "tasks"]))       
 
@@ -41,6 +30,15 @@
 (defn update-task-status [id status] (client ["update" "tasks" {:done? status} {"where" ["=" "id" id]}])) 
 
 (defn delete-task [id] (client ["delete" "tasks" {"where" ["=" "id" id]} ]))
+
+(defn insert-task [task]
+  (if (empty? (select-all-tasks))
+    (def id 1)
+    (def id (inc ((first (select-all-tasks)) "id")))
+  )
+  (client ["insert" "tasks" {:id id :task task :done? false}])
+  (html [:p "Task added with id: " id] )
+)
 
 (defn template [head, body]
   (html5 

@@ -1,6 +1,6 @@
-(defproject hello-world "0.1.0-SNAPSHOT"
-  :description "Hello world!"
-  :url "http://example.com/FIXME"
+(defproject clojure-todo "0.1.0-SNAPSHOT"
+  :description "Clojure-Todo"
+  :url "http://github.com/erlendr/clojure-todo"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [
@@ -11,6 +11,6 @@
                  [cheshire "5.2.0"]
                  ]
   :plugins [[lein-ring "0.8.8"]]
-  :ring {:handler hello-world.core/app}
+  :ring {:handler clojure-todo.handler/app}
   :profiles
   {:dev {:dependencies [[ring-mock "0.1.5"]]}})
