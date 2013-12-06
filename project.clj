@@ -5,10 +5,11 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [
                  [org.clojure/clojure "1.5.1"]
+                 [ring "1.2.1"]
                  [compojure "1.1.6"]
                  [hiccup "1.0.4"]
-                 [fleetdb-client "0.2.2"]
                  [cheshire "5.2.0"]
+                 [com.novemberain/monger "1.5.0"]
                  ]
   :plugins [[lein-ring "0.8.8"]]
   :ring {:handler clojure-todo.handler/app}

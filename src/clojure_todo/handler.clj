@@ -1,43 +1,50 @@
 (ns clojure-todo.handler
-(:use
+  (:use
    compojure.core
    hiccup.core
    hiccup.page
    hiccup.form
-   fleetdb.client
    cheshire.core
+   [monger.core :only [connect! connect-via-uri! connect set-db! get-db]]
+   [monger.collection :only [insert find-maps find-one-as-map update-by-id remove-by-id]]
    )
 (:require [compojure.route :as route]
           [compojure.handler :as handler]
           [cheshire.core :refer :all]
+          [cheshire.generate :refer [add-encoder encode-str remove-encoder]]
           )
+(:import
+ [com.mongodb MongoOptions ServerAddress]
+ [org.bson.types ObjectId]
+ [com.mongodb DB WriteConcern]
+ )
 )
 
 (require 'clojure.pprint)
-(require 'compojure.core)
-(require 'compojure.route)
 (require 'hiccup.core)
 (require 'hiccup.page)
 (require 'hiccup.form)
-(require 'fleetdb.client)
+
+(add-encoder org.bson.types.ObjectId (fn [c jsonGenerator] (.writeString jsonGenerator(.toString c))))
+(add-encoder com.mongodb.WriteResult (fn [c jsonGenerator] (.writeString jsonGenerator(.toString c))))
+
+
+(def mongo-uri "mongodb://clojure-todo:clojure-todo@ds057548.mongolab.com:57548/heroku_app20119486")
+
+(connect-via-uri! mongo-uri)
 
 (def client (connect))
+(defn select-all-tasks [] (find-maps "clojure-todo"))
 
-(defn select-all-tasks [] (client ["select" "tasks"]))       
+(defn select-task [id] (find-one-as-map "clojure-todo" { :_id (ObjectId. id) }))
 
-(defn select-task [id] (first (client ["select" "tasks" {"where" ["=" "id" id]}])))
+(defn update-task-status [id status] (update-by-id "clojure-todo" (ObjectId. id) {:done? status}))
 
-(defn update-task-status [id status] (client ["update" "tasks" {:done? status} {"where" ["=" "id" id]}])) 
-
-(defn delete-task [id] (client ["delete" "tasks" {"where" ["=" "id" id]} ]))
+(defn delete-task [id] (remove-by-id "clojure-todo" (ObjectId. id)))
 
 (defn insert-task [task]
-  (if (empty? (select-all-tasks))
-    (def id 1)
-    (def id (inc ((first (select-all-tasks)) "id")))
-  )
-  (client ["insert" "tasks" {:id id :task task :done? false}])
-  (html [:p "Task added with id: " id] )
+  (insert "clojure-todo" {:task task :done? false})
+  (str "task added")
 )
 
 (defn template [head, body]
@@ -51,16 +58,16 @@
   (for [task tasks]
     (html
      [:div.task
-      [:h3 (task "task")]
+      [:h3 (task :task)]
 
       [:div.btn-group
-      (if (task "done?")
-        [:button.btn.btn-success {:data-task-id (task "id") }
+      (if (task :done?)
+        [:button.btn.btn-success {:data-task-id (str (task :_id)) }
          [:span.glyphicon.glyphicon-ok-sign]]
-        [:button.btn.btn-default {:data-task-id (task "id")}
+        [:button.btn.btn-default {:data-task-id (str (task :_id))}
          [:span.glyphicon.glyphicon-ok-circle]] 
         )
-        [:button.btn.btn-danger.task-delete {:data-task-id (task "id") }
+        [:button.btn.btn-danger.task-delete {:data-task-id (str (task :_id)) }
          [:span.glyphicon.glyphicon-remove]]
        ]
       ]
@@ -115,17 +122,17 @@
 
 (defroutes app-routes
   (GET "/" [] (index))
-  (GET "/tasks" [] (str (select-all-tasks)))
-  (GET "/tasks/:id" [id] (generate-string (select-task (read-string id))))
+  (GET "/tasks" [] (generate-string (select-all-tasks)))
+  (GET "/tasks/:id" [id] (generate-string (select-task id)))
   (POST "/tasks/update-status" {params :params}
         (generate-string
          (update-task-status
-          (read-string (params :id))
+          (params :id)
           (read-string (params :done))
           )
          ))
   (POST "/tasks" {params :params} (insert-task (params :task)))
-  (DELETE "/tasks/:id" [id] (generate-string (delete-task (read-string id))))
+  (DELETE "/tasks/:id" [id] (generate-string (delete-task id)))
   (route/resources "/")
   (route/not-found (template "" "Not Found")))
 
