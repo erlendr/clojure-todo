@@ -11,6 +11,7 @@
                  [cheshire "5.2.0"]
                  [com.novemberain/monger "1.5.0"]
                  ]
+  :uberjar "clojure-todo-standalone.jar"
   :plugins [[lein-ring "0.8.8"]]
   :ring {:handler clojure-todo.handler/app}
   :profiles
