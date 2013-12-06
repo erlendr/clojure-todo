@@ -137,7 +137,5 @@
 (defn start [port]
   (run-jetty #'app {:port port :join? false}))
 
-(defn -main []
-  (let [port (Integer/parseInt
-               (or (System/getenv "PORT") "8080"))]
-  (start port)))
+(defn -main [port]
+  (start port))
