@@ -7,6 +7,7 @@
    cheshire.core
    [monger.core :only [connect! connect-via-uri! connect set-db! get-db]]
    [monger.collection :only [insert find-maps find-one-as-map update-by-id remove-by-id]]
+   [ring.adapter.jetty :as ring]
    )
 (:require [compojure.route :as route]
           [compojure.handler :as handler]
@@ -130,3 +131,11 @@
 
 (def app
   (handler/site app-routes))
+
+(defn start [port]
+  (run-jetty #'app {:port port :join? false}))
+
+(defn -main []
+  (let [port (Integer/parseInt
+               (or (System/getenv "PORT") "8080"))]
+  (start port)))
