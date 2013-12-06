@@ -7,6 +7,7 @@
    cheshire.core
    [monger.core :only [connect! connect-via-uri! connect set-db! get-db]]
    [monger.collection :only [insert find-maps find-one-as-map update-by-id remove-by-id]]
+   monger.operators
    [ring.adapter.jetty :as ring]
    )
 (:require [compojure.route :as route]
@@ -33,7 +34,8 @@
 
 (defn select-task [id] (find-one-as-map "clojure-todo" { :_id (ObjectId. id) }))
 
-(defn update-task-status [id status] (update-by-id "clojure-todo" (ObjectId. id) {:done? status}))
+(defn update-task-status [id status]
+  (update-by-id "clojure-todo" (ObjectId. id) {$set {:done? status } }))
 
 (defn delete-task [id] (remove-by-id "clojure-todo" (ObjectId. id)))
 
