@@ -12,6 +12,7 @@
           [compojure.handler :as handler]
           [cheshire.core :refer :all]
           [cheshire.generate :refer [add-encoder encode-str remove-encoder]]
+          monger.json
           )
 (:import
  [com.mongodb MongoOptions ServerAddress]
@@ -19,15 +20,6 @@
  [com.mongodb DB WriteConcern]
  )
 )
-
-(require 'clojure.pprint)
-(require 'hiccup.core)
-(require 'hiccup.page)
-(require 'hiccup.form)
-
-(add-encoder org.bson.types.ObjectId (fn [c jsonGenerator] (.writeString jsonGenerator(.toString c))))
-(add-encoder com.mongodb.WriteResult (fn [c jsonGenerator] (.writeString jsonGenerator(.toString c))))
-
 
 (def mongo-uri "mongodb://clojure-todo:clojure-todo@ds057548.mongolab.com:57548/heroku_app20119486")
 
