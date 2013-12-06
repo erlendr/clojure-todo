@@ -22,6 +22,8 @@
  )
 )
 
+(add-encoder com.mongodb.WriteResult (fn [c jsonGenerator] (.writeString jsonGenerator(.toString c))))
+
 (def mongo-uri "mongodb://clojure-todo:clojure-todo@ds057548.mongolab.com:57548/heroku_app20119486")
 
 (connect-via-uri! mongo-uri)
