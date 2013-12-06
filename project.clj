@@ -17,5 +17,6 @@
   :profiles
   {:dev {:dependencies [[ring-mock "0.1.5"]]}}
   :main clojure-todo.handler
+  :aot :all
   :min-lein-version "2.0.0"
   )
