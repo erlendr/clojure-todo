@@ -14,6 +14,7 @@
           [cheshire.core :refer :all]
           [cheshire.generate :refer [add-encoder encode-str remove-encoder]]
           monger.json
+          [ring.util.codec :as c]
           )
 (:import
  [com.mongodb MongoOptions ServerAddress]
@@ -38,7 +39,7 @@
 (defn delete-task [id] (remove-by-id "clojure-todo" (ObjectId. id)))
 
 (defn insert-task [task]
-  (insert "clojure-todo" {:task task :done? false})
+  (insert "clojure-todo" {:task (url-encode(task)) :done? false})
   (str "task added")
 )
 
