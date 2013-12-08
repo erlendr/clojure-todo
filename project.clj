@@ -13,7 +13,7 @@
                  ]
   :uberjar-name "clojure-todo-standalone.jar"
   :plugins [[lein-ring "0.8.8"]]
-  :ring {:handler clojure-todo.handler/app}
+  :ring {:handler clojure-todo.handler/app :init clojure-todo.handler/init }
   :profiles
   {:dev {:dependencies [[ring-mock "0.1.5"]]}}
   :main clojure-todo.handler

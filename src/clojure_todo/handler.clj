@@ -25,9 +25,7 @@
 
 (add-encoder com.mongodb.WriteResult (fn [c jsonGenerator] (.writeString jsonGenerator(.toString c))))
 
-(def mongo-uri (System/getenv "MONGOLAB_URI"))
-
-(connect-via-uri! mongo-uri)
+(defn init[] (connect-via-uri! (System/getenv "MONGOLAB_URI")))
 
 (def client (connect))
 (defn select-all-tasks [] (find-maps "clojure-todo"))
