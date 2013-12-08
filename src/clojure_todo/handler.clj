@@ -138,4 +138,5 @@
   (run-jetty #'app {:port port :join? false}))
 
 (defn -main [port]
+  (init)
   (start (Integer/parseInt port)))
