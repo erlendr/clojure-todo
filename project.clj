@@ -11,12 +11,12 @@
                  [cheshire "5.2.0"]
                  [com.novemberain/monger "1.5.0"]
                  ]
-  :uberjar-name "clojure-todo-standalone.jar"
+  ;:uberjar-name "clojure-todo-standalone.jar"
   :plugins [[lein-ring "0.8.8"]]
   :ring {:handler clojure-todo.handler/app :init clojure-todo.handler/init }
   :profiles
   {:dev {:dependencies [[ring-mock "0.1.5"]]}}
-  :main clojure-todo.handler
-  :aot :all
+  ;:main clojure-todo.handler
+  ;:aot :all
   :min-lein-version "2.0.0"
   )
